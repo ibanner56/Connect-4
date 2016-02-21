@@ -31,22 +31,17 @@ namespace Connect4Server
 
             while(winner == Checker.None && !game.Fullboard)
             {
-                Console.Write("Enter a column 1-7: ");
                 try
                 {
-                    int column = int.Parse(Console.ReadLine()) - 1;
-                    Checker move = redTurn ? Checker.Red : Checker.Blue;
-
-                    winner = game.Move(move, column);
+                    int column = redTurn ? p1.GetMove() : p2.GetMove();
+		    Checker move = redTurn ? Checker.Red : Checker.Blue;
+		    winner = game.Move(move, column);
                     redTurn = !redTurn;
+		    Console.Write(game.GetBoard());
                 }
                 catch (ArgumentException ex)
                 {
                     Console.Write("Chosen column is full. ");
-                }
-                catch (FormatException ex)
-                {
-                    Console.Write("Invalid column number. ");
                 }
             }
 

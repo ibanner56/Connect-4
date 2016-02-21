@@ -65,6 +65,22 @@ namespace Connect4Server
                 this.GId = GId;
             }
         }
+
+	public int GetMove()
+	{
+	    while(true) 
+	    {
+            	Console.Write("Enter a column 1-7: ");
+            	try
+            	{
+            	        return int.Parse(Console.ReadLine()) - 1;
+	    	}
+            	catch (FormatException ex)
+            	{
+            	    Console.Write("Invalid column number. ");
+            	}
+	    }
+	}
     }
 
     class Game
@@ -72,7 +88,6 @@ namespace Connect4Server
         public static Dictionary<Guid, Player> players = new Dictionary<Guid, Player>();
         public static Dictionary<Guid, Game> games = new Dictionary<Guid, Game>();
 
-        private Entry[,] board;
         private Player red;
         private Player blue;
 
@@ -112,23 +127,47 @@ namespace Connect4Server
         }
 
         public bool Fullboard { get; private set; }
+        public Entry[,] Board { get; private set; }
 
         public Checker Move(Checker checker, int column)
         {
-            if (board[0, column] != null)
+            if (Board[0, column] != null)
                 throw new ArgumentException("Column is full");
 
             for(int i = 5; i >= 0; i--)
             {
-                if(board[i,column] == null)
+                if(Board[i,column] == null)
                 {
-                    board[i, column] = new Entry(checker);
+                    Board[i, column] = new Entry(checker);
                     break;
                 }
             }
 
             return this.ValidateBoard();
         }
+
+	public String GetBoard()
+	{
+	    String result = "";
+	    for(int i = 0; i < 6; i++)
+	    {
+	    	for(int j = 0; j < 7; j++)
+		{
+		    if(this.Board[i, j] == null)
+		    {
+		    	result += "O ";
+			continue;
+		    }
+
+		    String checker = this.Board[i, j].Color == Checker.Red ? "R" : "B";
+		    result += checker + " ";
+		}
+
+		result += "\r\n";
+	    }
+
+	    return result;
+	}
 
         private Checker ValidateBoard()
         {
@@ -137,34 +176,33 @@ namespace Connect4Server
             {
                 for(int j = 0; j <= 6; j++)
                 {
-                    if (board[i, j] == null)
+                    if (Board[i, j] == null)
                     {
                         this.Fullboard = false;
                         continue;
                     }
 
                     if (j > 0)
-                        board[i, j].SetChain(0, board[i, j - 1]);
-                    if (i < 5)
+                        Board[i, j].SetChain(0, board[i, j - 1]);
+                    
+		    if (i < 5)
                     {
                         if (j > 0)
-                            board[i, j].SetChain(1, board[i + 1, j - 1]);
-                        board[i, j].SetChain(2, board[i + 1, j]);
-                        if (j < 6)
-                            board[i, j].SetChain(3, board[i + 1, j + 1]);
+                            Board[i, j].SetChain(1, board[i + 1, j - 1]);
+                        
+			Board[i, j].SetChain(2, board[i + 1, j]);
+                        
+			if (j < 6)
+                            Board[i, j].SetChain(3, board[i + 1, j + 1]);
                     }
 
                     for(int k = 0; k <= 3; k++)
                     {
-                        if(board[i,j].GetChain(k) >= 3)
-                        {
+                        if(Board[i,j].GetChain(k) >= 3)
                             return board[i, j].Color;
-                        }
                     }
                 }
             }
-
-
 
             return Checker.None;
         }
